@@ -128,7 +128,7 @@
     </div>
 
     <h6 class="sub-title">{{__('Dealer Detail')}}</h6>
-    <div class="control-label">
+    <div class="control-label mt-3">
     <div class="row">
         <div class="col-lg-2 col-md-2 col-sm-2">
             <div class="form-group">
@@ -179,7 +179,7 @@
         </div>
 
     <h6 class="sub-title">{{__('Billing Address')}}</h6>
-    <div class="control-label">
+    <div class="control-label mt-3">
     <div class="row">
         <div class="col-lg-2 col-md-2 col-sm-2">
             <div class="form-group">
@@ -271,7 +271,7 @@
             <input type="button" id="billing_data" value="{{__('Shipping Same As Billing')}}" class="btn btn-primary">
         </div>
         <h6 class="sub-title">{{__('Shipping Address')}}</h6>
-        <div class="control-label">
+        <div class="control-label mt-3">
         <div class="row">
             <div class="col-lg-2 col-md-2 col-sm-2">
                 <div class="form-group">
