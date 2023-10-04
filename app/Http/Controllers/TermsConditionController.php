@@ -21,7 +21,14 @@ class TermsConditionController extends Controller
 	}
 	
 	public function edit($id){
-		$termscondition = TermAndCondition::where('id',$id)->get();
+		$termscondition = TermAndCondition::where('id',$id)->first();
         return view('terms_conditions.edit', compact('termscondition'));
 	}
+
+    public function update(Request $request,$id){
+        $termscondition = TermAndCondition::find($id);
+        $termscondition->content = $request->input('content');
+        $termscondition->update();
+        return redirect()->back()->with('status','Terms & Condition Updated Successfully');
+    }
 }
