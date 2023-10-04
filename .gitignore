@@ -23,4 +23,3 @@ Homestead.json
 /.vagrant
 .phpunit.result.cache
 *.zip
-storage/
