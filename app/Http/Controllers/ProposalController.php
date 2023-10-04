@@ -76,13 +76,13 @@ class ProposalController extends Controller
         {
             $customFields    = CustomField::where('created_by', '=', \Auth::user()->creatorId())->where('module', '=', 'proposal')->get();
             $proposal_number = \Auth::user()->proposalNumberFormat($this->proposalNumber());
-            $customers       = Customer::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $customers->prepend('Select Customer', '');
+            $customers       = Customer::select('id','name','dealer_category')->where('created_by', \Auth::user()->creatorId())->get();
+            //$customers->prepend('Select Customer', '');
             $category = ProductServiceCategory::where('created_by', \Auth::user()->creatorId())->where('type', 1)->get()->pluck('name', 'id');
             $category->prepend('Select Category', '');
             $product_services = ProductService::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $product_services->prepend('--', '');
-
+            //echo '<pre>'; print_r($customers); die();
             return view('proposal.create', compact('customers', 'proposal_number', 'product_services', 'category', 'customFields', 'customerId'));
         }
         else
@@ -107,12 +107,12 @@ class ProposalController extends Controller
         $data['taxRate'] = $taxRate = !empty($product->tax_id) ? $product->taxRate($product->tax_id) : 0;
 
         $data['taxes'] = !empty($product->tax_id) ? $product->tax($product->tax_id) : 0;
-
+        $member_price =  ProductPriceList::select('standard','premium','alliance')->where('product_id',$request->product_id)->first();
         $salePrice           = $product->sale_price;
         $quantity            = 1;
         $taxPrice            = ($taxRate / 100) * ($salePrice * $quantity);
         $data['totalAmount'] = ($salePrice * $quantity);
-        $data['product_price'] = ProductPriceList::select('standard','premium','alliance')->where('product_id',$request->product_id)->first();
+        $data['product_price'] = $member_price;
 
         return json_encode($data);
     }
