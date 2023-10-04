@@ -2,73 +2,73 @@
 <div class="modal-body">
 
     <h6 class="sub-title">{{__('Basic Info')}}</h6>
-    <div class="row">
-        <div class="col-lg-4 col-md-4 col-sm-6">
+    <div class="control-label">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('name',__('Name'),array('class'=>'form-label')) }}
                 {{Form::text('name',null,array('class'=>'form-control','required'=>'required'))}}
 
             </div>
         </div>
-        <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('contact',__('Contact'),['class'=>'form-label'])}}
                 {{Form::text('contact',null,array('class'=>'form-control','required'=>'required'))}}
 
             </div>
         </div>
-        <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('email',__('Email'),['class'=>'form-label'])}}
                 {{Form::text('email',null,array('class'=>'form-control'))}}
 
             </div>
         </div>
-        <!-- <div class="col-lg-4 col-md-4 col-sm-6">
+        <!-- <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('tax_number',__('Tax Number'),['class'=>'form-label'])}}
                 {{Form::text('tax_number',null,array('class'=>'form-control'))}}
 
             </div>
         </div> -->
-        <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('gst_number',__('GST Number'),['class'=>'form-label'])}}
                 {{Form::text('gst',null,array('class'=>'form-control'))}}
             </div>
         </div>
-        <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('pan_number',__('PAN Number'),['class'=>'form-label'])}}
                 {{Form::text('pan',null,array('class'=>'form-control'))}}
             </div>
         </div>
-        <!-- <div class="col-lg-4 col-md-4 col-sm-6">
+        <!-- <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('website',__('Website'),['class'=>'form-label'])}}
                 {{Form::text('website',null,array('class'=>'form-control'))}}
             </div>
         </div> -->
-        <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('company_name',__('Company Name'),['class'=>'form-label'])}}
                 {{Form::text('company_name',null,array('class'=>'form-control','required'=>'required'))}}
             </div>
         </div>
-        <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('receivable',__('Receivable'),['class'=>'form-label'])}}
                 {{Form::number('receivable',null,array('class'=>'form-control'))}}
             </div>
         </div>
-        <div class="col-lg-4 col-md-4 col-sm-6">
+        <div class="col-lg-6 col-md-4 col-sm-6">
             <div class="form-group">
                 {{Form::label('unused',__('Unused'),['class'=>'form-label'])}}
                 {{Form::number('unused',null,array('class'=>'form-control'))}}
             </div>
         </div>
         @if(!$customFields->isEmpty())
-            <div class="col-lg-4 col-md-4 col-sm-6">
+            <div class="col-lg-6 col-md-4 col-sm-6">
                 <div class="tab-pane fade show" id="tab-2" role="tabpanel">
                     @include('customFields.formBuilder')
                 </div>
@@ -77,7 +77,7 @@
     </div>
 
     <h6 class="sub-title">{{__('Dealer Detail')}}</h6>
-    <div class="row">
+    <div class="control-label">
         <div class="col-lg-6 col-md-6 col-sm-6">
             <div class="form-group">
                 {{Form::label('dealer_category',__('Dealer Category'),array('class'=>'form-label')) }}
@@ -110,7 +110,7 @@
     </div>
 
     <h6 class="sub-title">{{__('Billing Address')}}</h6>
-    <div class="row">
+    <div class="control-label">
         <div class="col-lg-6 col-md-6 col-sm-6">
             <div class="form-group">
                 {{Form::label('billing_name',__('Name'),array('class'=>'','class'=>'form-label')) }}
@@ -125,10 +125,10 @@
 
             </div>
         </div>
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="form-group">
                 {{Form::label('billing_address',__('Address'),array('class'=>'form-label')) }}
-                {{Form::textarea('billing_address',null,array('class'=>'form-control','rows'=>3))}}
+                {{Form::textarea('billing_address',null,array('class'=>'form-control','control-labels'=>3))}}
 
             </div>
         </div>
@@ -172,7 +172,7 @@
             <input type="button" id="billing_data" value="{{__('Shipping Same As Billing')}}" class="btn btn-primary">
         </div>
         <h6 class="sub-title">{{__('Shipping Address')}}</h6>
-        <div class="row">
+        <div class="control-label">
             <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="form-group">
                     {{Form::label('shipping_name',__('Name'),array('class'=>'form-label')) }}
@@ -187,12 +187,12 @@
 
                 </div>
             </div>
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <div class="form-group">
                     {{Form::label('shipping_address',__('Address'),array('class'=>'form-label')) }}
                     <label class="form-label" for="example2cols1Input"></label>
                     <div class="input-group">
-                        {{Form::textarea('shipping_address',null,array('class'=>'form-control','rows'=>3))}}
+                        {{Form::textarea('shipping_address',null,array('class'=>'form-control','control-labels'=>3))}}
                     </div>
                 </div>
             </div>

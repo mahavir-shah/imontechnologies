@@ -3557,6 +3557,8 @@ Route::get('export/estimate', 'ProposalController@export')->name('proposal.expor
 Route::get('export/bill', 'BillController@export')->name('bill.export');
 Route::get('sale/terms-condition', 'TermsConditionController@index')->name('termscondition.index');
 Route::get('sale/terms-condition/edit/{id}', 'TermsConditionController@edit')->name('termscondition.edit');
+Route::post('sale/terms-condition/update/{id}', 'TermsConditionController@update')->name('termscondition.update');
+
 
 
 //=================================== Time-Tracker======================================================================
