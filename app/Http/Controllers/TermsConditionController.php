@@ -29,6 +29,7 @@ class TermsConditionController extends Controller
         $termscondition = TermAndCondition::find($id);
         $termscondition->content = $request->input('content');
         $termscondition->update();
-        return redirect()->back()->with('status','Terms & Condition Updated Successfully');
+        // return redirect()->back()->with('success','Terms & Condition Updated Successfully');
+        return redirect()->route('terms_conditions.index')->with('success', __('Terms & Condition Updated Successfully.'));
     }
 }

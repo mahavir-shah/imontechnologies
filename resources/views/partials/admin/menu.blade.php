@@ -788,7 +788,7 @@
                                 <a class="dash-link" href="{{ route('estimate.index') }}">{{__('Estimate')}}</a>
                             </li>
                             <li class="dash-item {{ (Request::segment(1) == 'order')?'active':''}}">
-                                <a href="{{ route('order.index') }}" class="dash-link">{{__('Order')}}</a>
+                                <a href="{{ route('pos.report') }}" class="dash-link">{{__('Order')}}</a>
                             </li>
                             
                             <li class="dash-item {{ (Request::route()->getName() == 'ship.pending' ) ? ' active' : '' }}">
@@ -829,7 +829,7 @@
                                             </li> --}}
 
                                             <li class="dash-item {{ (Request::route()->getName() == 'pos.report' ) ? ' active' : '' }}">
-                                                <a class="dash-link" href="{{ route('pos.report') }}">{{__('Sales')}}</a>
+                                                <a class="dash-link" href="{{ route('order.index') }}">{{__('Sales')}}</a>
                                             </li>
 
                                             <li class="dash-item {{ (Request::route()->getName() == 'ship.pending' ) ? ' active' : '' }}">

@@ -482,6 +482,11 @@ Route::get('payment/index', 'PaymentController@index')->name('payment.index')->m
         'revalidate',
     ]
 );
+Route::get('payment/index', 'TermsConditionController@index')->name('terms_conditions.index')->middleware(
+    [
+       
+    ]
+);
 Route::resource('payment', 'PaymentController')->middleware(
     [
         'auth',
