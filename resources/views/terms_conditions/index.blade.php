@@ -10,6 +10,18 @@
 @endsection
 
 @section('content')
+<style type="text/css">
+	tr td.ellipses-call{
+   text-overflow: ellipsis;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    white-space: pre-wrap;
+    width: 100%;
+    line-height: 43px;
+	}
+</style>
     <div class="row">
         <div class="col-xl-12">
             <div class="card">
@@ -27,7 +39,7 @@
                             @foreach ($termscondition as $termscon)
                                 <tr class="font-style">
                                     <td>{{ $termscon->customer_type}}</td>
-                                    <td width="60px">{{ $termscon->content}}</td>
+                                    <td class="ellipses-call">{!! $termscon->content !!}</td>
 									<td class="Action">
 									   <div class="action-btn bg-info ms-2">
 											<a href="{{ route('termscondition.edit',$termscon->id)}}" class="mx-3 btn btn-sm  align-items-center" title="{{__('Edit')}}"  data-title="{{__('Terms Condition Edit')}}">

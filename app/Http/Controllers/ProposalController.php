@@ -13,6 +13,7 @@ use App\Models\Products;
 use App\Models\ProductService;
 use App\Models\ProductPriceList;
 use App\Models\ProductServiceCategory;
+use App\Models\TermAndCondition;
 use App\Models\Proposal;
 use App\Models\ProposalProduct;
 use App\Models\StockReport;
@@ -98,6 +99,12 @@ class ProposalController extends Controller
         return view('proposal.customer_detail', compact('customer'));
     }
 
+    public function termAndCondition(Request $request){
+        $termcondition = TermAndCondition::select('content')->where('customer_type',$request->deller_type)->get()->first()->content;
+
+        return $termcondition;
+    }
+
     public function product(Request $request)
     {
 
@@ -144,7 +151,9 @@ class ProposalController extends Controller
             $proposal->status         = 0;
             $proposal->issue_date     = $request->issue_date;
             //$proposal->category_id    = $request->category_id;
-//            $proposal->discount_apply = isset($request->discount_apply) ? 1 : 0;
+            $proposal->discount_apply = isset($request->discount_apply) ? $request->discount_apply : 0;
+            $proposal->total_amount = isset($request->total_amount) ? $request->total_amount : 0;
+            $proposal->edjust_amount = isset($request->edjust_amount) ? $request->edjust_amount : 0;
             $proposal->created_by     = \Auth::user()->creatorId();
             $proposal->customer_note = $request->customer_note;
             $proposal->save();
@@ -192,7 +201,7 @@ class ProposalController extends Controller
             $id              = Crypt::decrypt($ids);
             $proposal        = Proposal::find($id);
             $proposal_number = \Auth::user()->proposalNumberFormat($proposal->proposal_id);
-            $customers       = Customer::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $customers       = Customer::select('id','name','dealer_category')->where('created_by', \Auth::user()->creatorId())->get();
             $category        = ProductServiceCategory::where('created_by', \Auth::user()->creatorId())->where('type', 1)->get()->pluck('name', 'id');
             $category->prepend('Select Category', '');
             $product_services = ProductService::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
@@ -240,7 +249,9 @@ class ProposalController extends Controller
                 $proposal->issue_date     = $request->issue_date;
                 $proposal->customer_note = $request->customer_note;
                 //$proposal->category_id    = $request->category_id;
-//                $proposal->discount_apply = isset($request->discount_apply) ? 1 : 0;
+               $proposal->discount_apply = isset($request->discount_apply) ? 1 : 0;
+               $proposal->total_amount = isset($request->total_amount) ? $request->total_amount : 0;
+            $proposal->edjust_amount = isset($request->edjust_amount) ? $request->edjust_amount : 0;
                 $proposal->save();
                 CustomField::saveData($proposal, $request->customField);
                 $products = $request->items;

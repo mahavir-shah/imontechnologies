@@ -16,6 +16,8 @@ class Proposal extends Model
         'converted_invoice_id',
         'created_by',
         'customer_note',
+        'edjust_amount',
+        'total_amount',
     ];
 
     public static $statues = [

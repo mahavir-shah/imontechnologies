@@ -21,23 +21,14 @@
     <div class="row">
         <!-- [ sample-page ] start -->
         <div class="col-sm-12">
-            <div class="row">
+            <div class="row card">
                 <div class="col-xl-12">
-                    <div class="card-header">
-                            <h5>{{ __('Terms Condition') }}</h5>
-                            <small class="text-muted">{{ __('Edit Terms Condition') }}</small>
-                        </div>
                          {{ Form::open(['route' => ['termscondition.update',$termscondition->id ], 'method' => 'post']) }}
                         <div class="card-body">
                             <div class="row">
                                 <div class="form-group col-md-6">
-                                    {{Form::label('company_name *',__('Company Name *'),array('class' => 'form-label')) }}
-                                    {{Form::text('company_name',null,array('class'=>'form-control font-style'))}}
-                                    @error('company_name')
-                                    <span class="invalid-company_name" role="alert">
-										<strong class="text-danger">{{ $message }}</strong>
-									</span>
-                                    @enderror
+                                    {{Form::label(' *',__('Customer Type:'),array('class' => 'form-label')) }}
+									{{ $termscondition->customer_type }}
                                 </div>
                                 <div class="form-group col-12">
                                     {{Form::label('content',__(' Format'),['class'=>'form-label text-dark'])}}

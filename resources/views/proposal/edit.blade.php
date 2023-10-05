@@ -70,12 +70,41 @@
 
         }
 
+        function formatMoney(number, decPlaces, decSep, thouSep) {
+            decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+            decSep = typeof decSep === "undefined" ? "." : decSep;
+            thouSep = typeof thouSep === "undefined" ? "," : thouSep;
+            var sign = number < 0 ? "-" : "";
+            var i = String(parseInt(number = Math.abs(Number(number) || 0).toFixed(decPlaces)));
+            var j = (j = i.length) > 3 ? j % 3 : 0;
 
+            return sign +
+                (j ? i.substr(0, j) + thouSep : "") +
+                i.substr(j).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
+                (decPlaces ? decSep + Math.abs(number - i).toFixed(decPlaces).slice(2) : "");
+        }
+        $.ajax({
+                url: "{{route('proposal.termAndCondition')}}",
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': jQuery('#token').val()
+                },
+                data: {
+                    'deller_type':$('select[name="customer_id"] option:selected').attr('rel'),
+                },
+                dataType: 'html',
+                success: function (data) {
+                    $('#customer-term-con-sec').removeClass("d-none");
+                    $('#customer-term-con').html(data);
+                },
+
+            });
         $(document).on('change', '#customer', function () {
             $('#customer_detail').removeClass('d-none');
             $('#customer_detail').addClass('d-block');
             $('#customer-box').removeClass('d-block');
             $('#customer-box').addClass('d-none');
+            $('#customer-term-con-sec').addClass("d-none");
             var id = $(this).val();
             var url = $(this).data('url');
             $.ajax({
@@ -97,6 +126,22 @@
                         $('#customer_detail').removeClass('d-block');
                         $('#customer_detail').addClass('d-none');
                     }
+                },
+
+            });
+            $.ajax({
+                url: "{{route('proposal.termAndCondition')}}",
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': jQuery('#token').val()
+                },
+                data: {
+                    'deller_type':$('select[name="customer_id"] option:selected').attr('rel'),
+                },
+                dataType: 'html',
+                success: function (data) {
+                    $('#customer-term-con-sec').removeClass("d-none");
+                    $('#customer-term-con').html(data);
                 },
 
             });
@@ -158,6 +203,13 @@
                                 $(el.parent().parent().find('.price')).val(item.product.sale_price);
                                 $(el.parent().parent().find('.discount')).val(0);
                             }
+							$(el.parents('tbody').find('textarea[placeholder="Description"]')).val(item.product.description);
+							let prefixname = $(el.parents('tbody').find('textarea[placeholder="Description"]')).attr('name').split('[description]')[0];
+							console.log("prefixname",prefixname);
+							$(el.parents('tbody').find('p.hsn_code')).html(
+								`<span>HSN Code: `+item.product.hsn_code+`</span>`+
+								`<input type="hidden" name="`+prefixname+`[hsn_code]" value="`+item.product.hsn_code+`"/>`
+							); 
 
 
                             var taxes = '';
@@ -222,9 +274,17 @@
                                 totalItemTaxPrice += parseFloat(itemTaxPriceInput[j].value);
                             }
 
+
+                            var excut_amont = 0;
+                            if($('.edjust-amount').val() == ''){
+                                 excut_amont = 0;
+                            }else{
+                                excut_amont = parseFloat($('.edjust-amount').val());
+                            }
                             $('.totalTax').html(totalItemTaxPrice.toFixed(2));
-                            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + parseFloat(totalItemTaxPrice)).toFixed(2));
-                            $('.totalDiscount').html(totalItemDiscountPrice.toFixed(2));
+                            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+                            $('.totalAmountInput').val((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+                            $('.totalDiscount').val(totalItemDiscountPrice.toFixed(2));
 
                         }
                     });
@@ -245,6 +305,8 @@
             var totalItemPrice = (quantity * price);
             var amount = (totalItemPrice);
             $(el.find('.amount')).html(amount);
+            $(el.find('.amount')).html(formatMoney(amount));
+            $(el.find('.amount')).attr('rel',amount.toFixed(2));
 
             var totalItemTaxRate = $(el.find('.itemTaxRate')).val();
             var itemTaxPrice = parseFloat((totalItemTaxRate / 100) * (totalItemPrice));
@@ -261,18 +323,22 @@
             var inputs = $(".amount");
             var subTotal = 0;
             for (var i = 0; i < inputs.length; i++) {
-                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).html());
+                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).attr('rel'));
             }
-            $('.subTotal').html(subTotal.toFixed(2));
-            $('.totalTax').html(totalItemTaxPrice.toFixed(2));
-
-            $('.totalAmount').html((parseFloat(subTotal) + parseFloat(totalItemTaxPrice)).toFixed(2));
+            $('.subTotal').html(formatMoney(subTotal.toFixed(2)));
+            $('.totalTax').html(formatMoney(totalItemTaxPrice.toFixed(2)));
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
+            $('.totalAmount').html(formatMoney((parseFloat(subTotal) + excut_amont+ parseFloat(totalItemTaxPrice)).toFixed(2)));
+            $('.totalAmountInput').val(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
 
         })
 
-
         $(document).on('keyup', '.price', function () {
-
             var el = $(this).parent().parent().parent().parent();
             var price = $(this).val();
             var quantity = $(el.find('.quantity')).val();
@@ -281,6 +347,8 @@
 
             var amount = (totalItemPrice);
             $(el.find('.amount')).html(amount);
+            $(el.find('.amount')).html(formatMoney(amount));
+            $(el.find('.amount')).attr('rel',amount.toFixed(2));
 
 
             var totalItemTaxRate = $(el.find('.itemTaxRate')).val();
@@ -298,20 +366,34 @@
             var inputs = $(".amount");
             var subTotal = 0;
             for (var i = 0; i < inputs.length; i++) {
-                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).html());
+                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).attr('rel'));
             }
-            $('.totalTax').html(totalItemTaxPrice.toFixed(2));
-
-            $('.subTotal').html(subTotal.toFixed(2));
-            $('.totalAmount').html((parseFloat(subTotal) + parseFloat(totalItemTaxPrice)).toFixed(2));
+            $('.totalTax').html(formatMoney(totalItemTaxPrice.toFixed(2)));
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
+            $('.subTotal').html(formatMoney(subTotal.toFixed(2)));
+            $('.totalAmount').html(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
+            $('.totalAmountInput').val(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
 
         })
 
-        $(document).on('keyup', '.discount', function () {
-            var el = $(this).parent().parent().parent().parent();
-            var discount = $(this).val();
-            var price = $(el.find('.price')).val();
 
+        $(document).on('keyup', '.discount', function () {
+            debugger
+            var el = $(this).parent().parent().parent().parent();
+            var discount = 0;
+            if($(this).val() == ''){
+                 discount = 0;
+            }else{
+                discount = $(this).val();
+            }
+            console.log(discount);
+            var price = $(el.find('.price')).val();
+    
             var quantity = $(el.find('.quantity')).val();
             var totalItemPrice = (quantity * price);
 
@@ -332,23 +414,70 @@
 
             for (var k = 0; k < itemDiscountPriceInput.length; k++) {
 
-                totalItemDiscountPrice += parseFloat(itemDiscountPriceInput[k].value);
+                totalItemDiscountPrice += itemDiscountPriceInput[k].value != '' ? parseFloat(itemDiscountPriceInput[k].value) : 0;
             }
 
             var amount = (totalItemPrice);
             $(el.find('.amount')).html(amount);
+            $(el.find('.amount')).html(formatMoney(amount));
+            $(el.find('.amount')).attr('rel',amount.toFixed(2));
 
             var inputs = $(".amount");
             var subTotal = 0;
             for (var i = 0; i < inputs.length; i++) {
-                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).html());
+                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).attr('rel'));
             }
             $('.subTotal').html(subTotal.toFixed(2));
-            $('.totalDiscount').html(totalItemDiscountPrice.toFixed(2));
+            $('.totalDiscount').val(totalItemDiscountPrice.toFixed(2));
             $('.totalTax').html(totalItemTaxPrice.toFixed(2));
-
-            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + parseFloat(totalItemTaxPrice)).toFixed(2));
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
+            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+            $('.totalAmountInput').val((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+            console.log((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + parseFloat(totalItemTaxPrice)).toFixed(2));
         })
+
+        $(document).on('keyup', '.add-discount', function () {
+            var discount = 0;
+            if($(this).val() == ''){
+                 discount = 0;
+            }else{
+                discount = $(this).val();
+            }
+
+            var subTotal = $('.subTotal').text();
+            var totalItemTaxPrice = $('.totalTax').text();
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
+
+            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(discount) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+            $('.totalAmountInput').val((parseFloat(subTotal) - parseFloat(discount) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+        });
+
+        $(document).on('keyup', '.edjust-amount', function () {
+            var excut_amont = 0;
+            if($(this).val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($(this).val());
+            }
+            var discount = $('.add-discount').val();
+            var subTotal = $('.subTotal').text();
+            var totalItemTaxPrice = $('.totalTax').text();
+            var totalAmount = (parseFloat(subTotal) - parseFloat(discount) + parseFloat(totalItemTaxPrice)) + excut_amont;
+            console.log(totalAmount);
+            $('.totalAmount').html(parseFloat(totalAmount).toFixed(2));
+            $('.totalAmountInput').val(parseFloat(totalAmount).toFixed(2));
+
+        });
 
         $(document).on('click', '[data-repeater-create]', function () {
             $('.item :selected').each(function () {
@@ -399,7 +528,13 @@
                         <div class="col-md-6">
                             <div class="form-group" id="customer-box">
                                     {{ Form::label('customer_id', __('Customer'),['class'=>'form-label']) }}
-                                    {{ Form::select('customer_id', $customers,null, array('class' => 'form-control select ','id'=>'customer','data-url'=>route('proposal.customer'),'required'=>'required')) }}
+                                    <select name="customer_id" class="form-control select" id="customer" data-url="{{route('proposal.customer')}}" required>
+                                    <option value="">Select Customer</option>
+                                    @foreach($customers as $data)
+                                        <option value="{{$data->id}}" rel="{{$data->dealer_category}}" {{$proposal->customer_id == $data->id ? 'selected':''}}>{{$data->name}}</option>
+                                    @endforeach
+                                  <option>  
+                                </select>
                             </div>
                             <div id="customer_detail" class="d-none">
                             </div>
@@ -538,11 +673,19 @@
                                 </td>
                                 <td colspan="5"></td>
                             </tr>
-
+                            <tr>
+                                <td colspan="2">
+                                    <div class="form-group">
+                                        {{Form::label('customer_note',__('Customer Notes')) }}
+                                        {{ Form::textarea('customer_note', null, ['class'=>'form-control','rows'=>'1','placeholder'=>__('Customer Note')]) }}
+                                    </div>
+                                </td>
+                                <td colspan="5"></td>
+                            </tr>
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td>{{Form::label('customer_note',__('Customer Notes')) }}</td>
+                                <td></td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td></td>
@@ -551,12 +694,12 @@
                                 <td></td>
                             </tr>
                             <tr>
-                                <td>{{ Form::textarea('customer_note', null, ['class'=>'form-control','rows'=>'1','placeholder'=>__('Customer Note')]) }}</td>
+                                <td></td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td></td>
                                 <td><strong>{{__('Discount')}} ({{\Auth::user()->currencySymbol()}})</strong></td>
-                                <td class="text-end totalDiscount">0.00</td>
+                                <td class="text-end totalDiscount"><input type="text" name="discount_apply" class="form-control totalDiscount add-discount" value="{{$proposal->discount_apply}}"></td>
                                 <td></td>
                             </tr>
                             <tr>
@@ -572,8 +715,17 @@
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
+                                <td></td>
+                                <td><strong>{{__('Edjust Amount')}} ({{\Auth::user()->currencySymbol()}})</strong></td>
+                                <td class="text-end"><input type="text" name="edjust_amount" class="form-control  edjust-amount" value="{{$proposal->edjust_amount}}"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
                                 <td>&nbsp;</td>
-                                <td class="blue-text border-none"><strong>{{__('Total Amount')}} ({{\Auth::user()->currencySymbol()}})</strong></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td class="blue-text border-none"><strong>{{__('Total Amount')}} ({{\Auth::user()->currencySymbol()}})</strong><input type="hidden" name="total_amount" class="totalAmountInput" value=""></td>
                                 <td class="text-end totalAmount blue-text border-none">0.00</td>
                                 <td></td>
                             </tr>
@@ -583,7 +735,16 @@
                 </div>
             </div>
         </div>
-
+        <div class="card d-none" id="customer-term-con-sec">
+                <div class="card-header">
+                    <h6>{{Form::label('customer_note',__('Terms & Condition')) }}</h6>
+                </div>
+                <div class="card-body mt-3">
+                    <div class="form-group">
+                        <p id="customer-term-con"></p>
+                    </div>
+                </div>
+            </div>
         <div class="modal-footer">
             <input type="button" value="{{__('Cancel')}}" onclick="location.href = '{{route("estimate.index")}}';" class="btn btn-light">
             <input type="submit" value="{{__('Update')}}" class="btn btn-primary">

@@ -45,6 +45,7 @@
                         }
                         $('.subTotal').html(formatMoney(subTotal.toFixed(2)));
                         $('.totalAmount').html(formatMoney(subTotal.toFixed(2)));
+                        $('.totalAmountInput').val(formatMoney(subTotal.toFixed(2)));
                     }
                 },
                 ready: function (setIndexes) {
@@ -66,6 +67,8 @@
             $('#customer-box').removeClass('d-block');
             $('#customer-box').addClass('d-none');
             var id = $(this).val();
+			$('#customer-term-con-sec').addClass("d-none");
+
             var url = $(this).data('url');
             $.ajax({
                 url: url,
@@ -74,7 +77,8 @@
                     'X-CSRF-TOKEN': jQuery('#token').val()
                 },
                 data: {
-                    'id': id
+                    'id': id,
+                    'deller_type':$('select[name="customer_id"] option:selected').attr('rel'),
                 },
                 cache: false,
                 success: function (data) {
@@ -86,6 +90,23 @@
                         $('#customer_detail').removeClass('d-block');
                         $('#customer_detail').addClass('d-none');
                     }
+                },
+
+            });
+
+            $.ajax({
+                url: "{{route('proposal.termAndCondition')}}",
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': jQuery('#token').val()
+                },
+                data: {
+                    'deller_type':$('select[name="customer_id"] option:selected').attr('rel'),
+                },
+                cache: false,
+                success: function (data) {
+					$('#customer-term-con-sec').removeClass("d-none");
+                    $('#customer-term-con').html(data);
                 },
 
             });
@@ -196,9 +217,16 @@
                         totalItemTaxPrice += parseFloat(itemTaxPriceInput[j].value);
                     }
 
-                    $('.totalTax').html(formatMoney(totalItemTaxPrice.toFixed(2)));
-                    $('.totalAmount').html(formatMoney((parseFloat(subTotal) + parseFloat(totalItemTaxPrice)).toFixed(2)));
+                    var excut_amont = 0;
+                    if($('.edjust-amount').val() == ''){
+                         excut_amont = 0;
+                    }else{
+                        excut_amont = parseFloat($('.edjust-amount').val());
+                    }
 
+                    $('.totalTax').html(formatMoney(totalItemTaxPrice.toFixed(2)));
+                    $('.totalAmount').html(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
+                    $('.totalAmountInput').val(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
                 },
             });
         });
@@ -214,7 +242,7 @@
             var totalItemPrice = (quantity * price);
             var amount = (totalItemPrice);
             $(el.find('.amount')).html(amount);
-$(el.find('.amount')).html(formatMoney(amount));
+			$(el.find('.amount')).html(formatMoney(amount));
             $(el.find('.amount')).attr('rel',amount.toFixed(2));
 
             var totalItemTaxRate = $(el.find('.itemTaxRate')).val();
@@ -237,7 +265,15 @@ $(el.find('.amount')).html(formatMoney(amount));
             $('.subTotal').html(formatMoney(subTotal.toFixed(2)));
             $('.totalTax').html(formatMoney(totalItemTaxPrice.toFixed(2)));
 
-            $('.totalAmount').html(formatMoney((parseFloat(subTotal) + parseFloat(totalItemTaxPrice)).toFixed(2)));
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
+
+            $('.totalAmount').html(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
+            $('.totalAmountInput').val(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
 
         })
 
@@ -250,7 +286,7 @@ $(el.find('.amount')).html(formatMoney(amount));
 
             var amount = (totalItemPrice);
             $(el.find('.amount')).html(amount);
-$(el.find('.amount')).html(formatMoney(amount));
+			$(el.find('.amount')).html(formatMoney(amount));
             $(el.find('.amount')).attr('rel',amount.toFixed(2));
 
 
@@ -272,23 +308,31 @@ $(el.find('.amount')).html(formatMoney(amount));
                 subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).attr('rel'));
             }
             $('.totalTax').html(formatMoney(totalItemTaxPrice.toFixed(2)));
-
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
             $('.subTotal').html(formatMoney(subTotal.toFixed(2)));
-            $('.totalAmount').html(formatMoney((parseFloat(subTotal) + parseFloat(totalItemTaxPrice)).toFixed(2)));
+            $('.totalAmount').html(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
+            $('.totalAmountInput').val(formatMoney((parseFloat(subTotal) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2)));
 
         })
 
 
         $(document).on('keyup', '.discount', function () {
+			debugger
             var el = $(this).parent().parent().parent().parent();
+			var discount = 0;
             if($(this).val() == ''){
-                var discount = 0;
+                 discount = 0;
             }else{
-                var discount = $(this).val();
+                discount = $(this).val();
             }
-            
+            console.log(discount);
             var price = $(el.find('.price')).val();
-
+	
             var quantity = $(el.find('.quantity')).val();
             var totalItemPrice = (quantity * price);
 
@@ -309,7 +353,7 @@ $(el.find('.amount')).html(formatMoney(amount));
 
             for (var k = 0; k < itemDiscountPriceInput.length; k++) {
 
-                totalItemDiscountPrice += parseFloat(itemDiscountPriceInput[k].value);
+                totalItemDiscountPrice += itemDiscountPriceInput[k].value != '' ? parseFloat(itemDiscountPriceInput[k].value) : 0;
             }
 
             var amount = (totalItemPrice);
@@ -320,14 +364,60 @@ $(el.find('.amount')).html(formatMoney(amount));
             var inputs = $(".amount");
             var subTotal = 0;
             for (var i = 0; i < inputs.length; i++) {
-                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).html());
+                subTotal = parseFloat(subTotal) + parseFloat($(inputs[i]).attr('rel'));
             }
             $('.subTotal').html(subTotal.toFixed(2));
-            $('.totalDiscount').html(totalItemDiscountPrice.toFixed(2));
+            $('.totalDiscount').val(totalItemDiscountPrice.toFixed(2));
             $('.totalTax').html(totalItemTaxPrice.toFixed(2));
-
-            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + parseFloat(totalItemTaxPrice)).toFixed(2));
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
+            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+            $('.totalAmountInput').val((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) +excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+			console.log((parseFloat(subTotal) - parseFloat(totalItemDiscountPrice) + parseFloat(totalItemTaxPrice)).toFixed(2));
         })
+
+        $(document).on('keyup', '.add-discount', function () {
+            var discount = 0;
+            if($(this).val() == ''){
+                 discount = 0;
+            }else{
+                discount = $(this).val();
+            }
+
+            var excut_amont = 0;
+            if($('.edjust-amount').val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($('.edjust-amount').val());
+            }
+
+            var subTotal = $('.subTotal').text();
+            var totalItemTaxPrice = $('.totalTax').text();
+
+            $('.totalAmount').html((parseFloat(subTotal) - parseFloat(discount) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+            $('.totalAmountInput').val((parseFloat(subTotal) - parseFloat(discount) + excut_amont + parseFloat(totalItemTaxPrice)).toFixed(2));
+        });
+
+        $(document).on('keyup', '.edjust-amount', function () {
+            var excut_amont = 0;
+            if($(this).val() == ''){
+                 excut_amont = 0;
+            }else{
+                excut_amont = parseFloat($(this).val());
+            }
+            var discount = $('.add-discount').val();
+            var subTotal = $('.subTotal').text();
+            var totalItemTaxPrice = $('.totalTax').text();
+            var totalAmount = (parseFloat(subTotal) - parseFloat(discount) + parseFloat(totalItemTaxPrice)) + excut_amont;
+            console.log(totalAmount);
+            $('.totalAmount').html(parseFloat(totalAmount).toFixed(2));
+            $('.totalAmountInput').val(parseFloat(totalAmount).toFixed(2));
+
+        });
 
         var customerId = '{{$customerId}}';
         if (customerId > 0) {
@@ -384,13 +474,6 @@ $(el.find('.amount')).html(formatMoney(amount));
                                         </div>
                                     </div>
                                 </div>
-
-{{--                                <div class="col-md-6">--}}
-{{--                                    <div class="form-check custom-checkbox mt-4">--}}
-{{--                                        <input class="form-check-input" type="checkbox" name="discount_apply" id="discount_apply">--}}
-{{--                                        <label class="form-check-label " for="discount_apply">{{__('Discount Apply')}}</label>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
 
 
 {{--                                <div class="col-md-6">--}}
@@ -467,7 +550,8 @@ $(el.find('.amount')).html(formatMoney(amount));
                                 </td>
                                 <td>
                                     <div class="form-group price-input input-group search-form">
-                                        {{ Form::text('discount','0', array('class' => 'form-control discount','required'=>'required','placeholder'=>__('Discount'))) }}
+                                        
+										<input type="number" required name="discount" class="form-control discount" placeholder="Discount" min="0">
                                         <span class="input-group-text bg-transparent">{{\Auth::user()->currencySymbol()}}</span>
                                     </div>
                                 </td>
@@ -487,10 +571,19 @@ $(el.find('.amount')).html(formatMoney(amount));
                                 </td>
                                 <td colspan="5"></td>
                             </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="form-group">
+                                        {{Form::label('customer_note',__('Customer Notes')) }}
+                                        {{ Form::textarea('customer_note', null, ['class'=>'form-control','rows'=>'1','placeholder'=>__('Customer Note')]) }}
+                                    </div>
+                                </td>
+                                <td colspan="5"></td>
+                            </tr>
                             </tbody>
                             <tfoot>
                             <tr class="border-none">
-                                <td>{{Form::label('customer_note',__('Customer Notes')) }}</td>
+                                <td></td>
                                 <td></td>
                                 <td>&nbsp;</td>
                                 <td></td>
@@ -499,12 +592,12 @@ $(el.find('.amount')).html(formatMoney(amount));
                                 <td></td>
                             </tr>
                             <tr>
-                                <td>{{ Form::textarea('customer_note', null, ['class'=>'form-control','rows'=>'1','placeholder'=>__('Customer Note')]) }}</td>
+                                <td></td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td></td>
                                 <td><strong>{{__('Discount')}} ({{\Auth::user()->currencySymbol()}})</strong></td>
-                                <td class="text-end totalDiscount">0.00</td>
+                                <td class="text-end"><input type="text" name="discount_apply" class="form-control totalDiscount add-discount" value="0.00"></td>
                                 <td></td>
                             </tr>
                             <tr>
@@ -520,8 +613,17 @@ $(el.find('.amount')).html(formatMoney(amount));
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
+                                <td></td>
+                                <td><strong>{{__('Edjust Amount')}} ({{\Auth::user()->currencySymbol()}})</strong></td>
+                                <td class="text-end"><input type="text" name="edjust_amount" class="form-control  edjust-amount" value="0.00"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
                                 <td>&nbsp;</td>
-                                <td class="blue-text border-none"><strong>{{__('Total Amount')}} ({{\Auth::user()->currencySymbol()}})</strong></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td class="blue-text border-none"><strong>{{__('Total Amount')}} ({{\Auth::user()->currencySymbol()}})</strong><input type="hidden" name="total_amount" class="totalAmountInput" value=""></td>
                                 <td class="text-end totalAmount blue-text border-none"></td>
                                 <td></td>
                             </tr>
@@ -531,6 +633,17 @@ $(el.find('.amount')).html(formatMoney(amount));
                 </div>
                 </div>
             </div>
+			
+			<div class="card d-none" id="customer-term-con-sec">
+				<div class="card-header">
+					<h6>{{Form::label('customer_note',__('Terms & Condition')) }}</h6>
+				</div>
+				<div class="card-body mt-3">
+					<div class="form-group">
+						<p id="customer-term-con"></p>
+					</div>
+				</div>
+			</div>
 
             <div class="modal-footer">
                 <input type="button" value="{{__('Cancel')}}" onclick="location.href = '{{route("estimate.index")}}';" class="btn btn-light">
