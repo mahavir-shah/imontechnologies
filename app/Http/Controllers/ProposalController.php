@@ -15,6 +15,10 @@ use App\Models\ProductPriceList;
 use App\Models\ProductServiceCategory;
 use App\Models\TermAndCondition;
 use App\Models\Proposal;
+use App\Models\PosProduct;
+use App\Models\PosPayment;
+use App\Models\Pos;
+use App\Models\UserClientDiscount;
 use App\Models\ProposalProduct;
 use App\Models\StockReport;
 use App\Models\Task;
@@ -914,11 +918,7 @@ class ProposalController extends Controller
         foreach($post as $key => $data)
         {
             \DB::insert(
-                'insert into settings (`value`, `name`,`created_by`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ', [
-                                                                                                                                             $data,
-                                                                                                                                             $key,
-                                                                                                                                             \Auth::user()->creatorId(),
-                                                                                                                                         ]
+                'insert into settings (`value`, `name`,`created_by`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ', []
             );
         }
 
@@ -964,6 +964,111 @@ class ProposalController extends Controller
         $data = Excel::download(new ProposalExport(), $name . '.xlsx');  ob_end_clean();
 
         return $data;
+    }
+
+     public function createOrder(Request $request)
+    {
+        if (Auth::user()->can('manage pos')) {
+            $user_id = Auth::user()->id;
+            $customer_id      = Customer::customer_id($request->vc_name);
+            $pos_id       = $this->invoicePosNumber();
+            $sales            = session()->get('pos');
+
+            if (isset($sales) && !empty($sales) && count($sales) > 0) {
+                $result = DB::table('pos')->where('pos_id', $pos_id)->where('created_by', $user_id)->get();
+                // if (count($result) > 0) {
+                //     return response()->json(
+                //         [
+                //             'code' => 200,
+                //             'success' => __('Payment is already completed!'),
+                //         ]
+                //     );
+                // } else {
+                    $pos_date = '';
+                    $clientDiscount = UserClientDiscount::select('payment')->where('id', Auth::user()->client_type)->first();
+                    $day = (int)$clientDiscount['payment'];
+                    $pos_date = date('Y-m-d',strtotime('+' . $day . 'days'));
+                    
+                    $pos = new Pos();
+                    $pos->pos_id       = $pos_id;
+                    $pos->customer_id      = $customer_id;
+                    $pos->created_by       = $user_id;
+                    $pos->pos_date       = $pos_date;
+                    $pos->customer_limit   = $request->customer_limit;
+                    $pos->save();
+
+                    foreach ($sales as $key => $value) {
+                        $product_id = $value['id'];
+
+                        $product = ProductService::whereId($product_id)->where('created_by', $user_id)->first();
+
+                        $original_quantity = ($product == null) ? 0 : (int)$product->quantity;
+
+                        $product_quantity = $original_quantity - $value['quantity'];
+
+
+                        if ($product != null && !empty($product)) {
+                            ProductService::where('id', $product_id)->update(['quantity' => $product_quantity]);
+                        }
+
+                        $tax_id = ProductService::tax_id($product_id);
+
+                        $positems = new PosProduct();
+                        $positems->pos_id    = $pos->id;
+                        $positems->product_id = $product_id;
+                        $positems->price      = $value['price'];
+                        $positems->quantity   = $value['quantity'];
+                        $positems->tax     = $tax_id;
+                        // $positems->tax        = $value['tax'];
+                        $positems->save();
+                    }
+
+                    $posPayment                 = new PosPayment();
+                    $posPayment->pos_id          =$pos->id;
+                    $posPayment->date           = $request->date;
+
+                    $discount = 0;
+                    $mainsubtotal = 0;
+                    $sales        = [];
+
+                    $sess = session()->get('pos');
+
+                    foreach ($sess as $key => $value) {
+                        $subtotal = $value['price'] * $value['quantity'];
+                        $tax      = ($subtotal * $value['tax']) / 100;
+                        $sales['data'][$key]['price']      = Auth::user()->priceFormat($value['price']);
+                        $sales['data'][$key]['tax']        = $value['tax'] . '%';
+                        $sales['data'][$key]['tax_amount'] = Auth::user()->priceFormat($tax);
+                        $sales['data'][$key]['subtotal']   = Auth::user()->priceFormat($value['subtotal']);
+                        $discount                           += $value['discount'];
+                        $mainsubtotal                      += $value['subtotal'];
+                    }
+                    $amount = $mainsubtotal;
+                    $posPayment->amount         = $amount;
+                    $posPayment->discount         = $discount;
+                    $posPayment->discount_amount       = $amount;
+                    $posPayment->save();
+
+                    session()->forget('pos');
+
+                    return response()->json(
+                        [
+                            'code' => 200,
+                            'success' => __('Payment completed successfully!'),
+                        ]
+                    );
+                // }
+            } else {
+                return response()->json(
+                    [
+                        'code' => 404,
+                        'success' => __('Items not found!'),
+                    ]
+                );
+            }
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
     }
 }
 
