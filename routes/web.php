@@ -560,6 +560,7 @@ Route::group(
     Route::get('estimate/{id}/duplicate', 'ProposalController@duplicate')->name('proposal.duplicate');
     Route::post('estimate/product/destroy', 'ProposalController@productDestroy')->name('proposal.product.destroy');
     Route::post('estimate/customer', 'ProposalController@customer')->name('proposal.customer');
+    Route::post('estimate/terms-condition', 'ProposalController@termAndCondition')->name('proposal.termAndCondition');
     Route::post('estimate/product', 'ProposalController@product')->name('proposal.product');
     Route::get('estimate/items', 'ProposalController@items')->name('proposal.items');
     Route::get('estimate/{id}/sent', 'ProposalController@sent')->name('proposal.sent');
