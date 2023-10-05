@@ -110,6 +110,14 @@ $profile=\App\Models\Utility::get_file('uploads/avatar/');
                                                         {!! Form::close() !!}
                                                     </div>
                                                 @endcan
+                                                @can('edit customer')
+                                                    <div class="action-btn bg-pink-400 ms-2">
+                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center" data-url="#" data-ajax-popup="false"  data-size="lg" data-bs-toggle="tooltip" title="{{__('Receive payment')}}"  data-title="{{__('Edit Customer')}}">
+                                                            <i class="ti ti-report-money mr-2 text-white"></i>
+                                                        </a>
+                                                    </div>
+
+                                                @endcan
 
                                             @endif
                                         </span>

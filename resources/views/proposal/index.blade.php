@@ -148,6 +148,15 @@
                                             <li>
                                             @can('edit proposal')
                                                 <div class="dropdown-item">
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-bs-toggle="tooltip">
+                                                        <i class="ti ti-pencil text-white"></i>Create Order
+                                                    </a>
+                                                </div>
+                                            @endcan
+                                            </li>
+                                            <li>
+                                            @can('edit proposal')
+                                                <div class="dropdown-item">
                                                     <a href="{{ route('estimate.edit',\Crypt::encrypt($proposal->id)) }}" class="mx-3 btn btn-sm  align-items-center" data-bs-toggle="tooltip">
                                                         <i class="ti ti-pencil text-white"></i>Edit
                                                     </a>
