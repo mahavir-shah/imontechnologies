@@ -121,8 +121,8 @@ class CustomerController extends Controller
                 $customer->shipping_zip     = $request->shipping_zip;
                 $customer->shipping_address = $request->shipping_address;
                 $customer->company_name = $request->company_name;
-                $customer->receivable = $request->receivable;
-                $customer->unused = $request->unused;
+                // $customer->receivable = $request->receivable;
+                // $customer->unused = $request->unused;
 
                 $customer->lang = !empty($default_language) ? $default_language->value : '';
 
@@ -255,8 +255,8 @@ class CustomerController extends Controller
             $customer->shipping_zip     = $request->shipping_zip;
             $customer->shipping_address = $request->shipping_address;
             $customer->company_name = $request->company_name;
-            $customer->receivable = $request->receivable;
-            $customer->unused = $request->unused;
+            // $customer->receivable = $request->receivable;
+            // $customer->unused = $request->unused;
             $customer->save();
 
             CustomField::saveData($customer, $request->customField);

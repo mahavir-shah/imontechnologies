@@ -94,7 +94,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-lg-2 col-md-2 col-sm-2">
                 <div class="form-group">
                 {{Form::label('receivable',__('Receivable'),['class'=>'form-label'])}}
@@ -105,8 +105,8 @@
                 {{Form::number('receivable',null,array('class'=>'form-control'))}}
                 </div>
             </div>
-        </div>
-        <div class="row">
+        </div> -->
+        <!-- <div class="row">
             <div class="col-lg-2 col-md-2 col-sm-2">
                 <div class="form-group">
                 {{Form::label('unused',__('Unused'),['class'=>'form-label'])}}
@@ -117,7 +117,7 @@
                 {{Form::number('unused',null,array('class'=>'form-control'))}}
                 </div>
             </div>
-        </div>
+        </div> -->
         @if(!$customFields->isEmpty())
             <div class="col-lg-6 col-md-4 col-sm-6">
                 <div class="tab-pane fade show" id="tab-2" role="tabpanel">
