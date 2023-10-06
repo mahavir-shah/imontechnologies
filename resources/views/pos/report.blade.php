@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 @section('page-title')
-    {{__('Sales')}}
+    {{__('Order')}}
 @endsection
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{route('dashboard')}}">{{__('Dashboard')}}</a></li>
-    <li class="breadcrumb-item">{{__('Sales')}}</li>
+    <li class="breadcrumb-item">{{__('Order')}}</li>
 @endsection
 @push('css-page')
     <link rel="stylesheet" href="{{ asset('css/datatable/buttons.dataTables.min.css') }}">
@@ -66,7 +66,7 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>{{__('SALE ID')}}</th>
+                                <th>{{__('ORDER ID')}}</th>
                                 <th>{{ __('Customer') }}</th>
                                 <th>{{ __('Sales Date') }}</th>
                                 <th>{{ __('Due Date') }}</th>
